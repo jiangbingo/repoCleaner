@@ -1,21 +1,31 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { GitHubRepo, AIAnalysis, AppState } from './types';
 import { GitHubService } from './services/githubService';
 import { GLMService } from './services/glmService';
 import TokenInput from './components/TokenInput';
 import RepoCard from './components/RepoCard';
+import TabSelector from './components/TabSelector';
+
+type RepoType = 'forks' | 'mine';
 
 const App: React.FC = () => {
-  const [token, setToken] = useState<string>('');
+  // 从 sessionStorage 初始化 token
+  const [token, setToken] = useState<string>(() => {
+    return sessionStorage.getItem('github_token') || '';
+  });
   const [status, setStatus] = useState<AppState>(AppState.IDLE);
-  const [repos, setRepos] = useState<GitHubRepo[]>([]);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-  const [analyses, setAnalyses] = useState<Record<number, AIAnalysis>>({});
+  const [activeTab, setActiveTab] = useState<RepoType>('forks');
+  const [forks, setForks] = useState<GitHubRepo[]>([]);
+  const [mine, setMine] = useState<GitHubRepo[]>([]);
+  const [selectedForkIds, setSelectedForkIds] = useState<Set<number>>(new Set());
+  const [selectedMineIds, setSelectedMineIds] = useState<Set<number>>(new Set());
+  const [forkAnalyses, setForkAnalyses] = useState<Record<number, AIAnalysis>>({});
+  const [mineAnalyses, setMineAnalyses] = useState<Record<number, AIAnalysis>>({});
   const [user, setUser] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
-  
+
   // 删除相关的详细状态
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteLog, setDeleteLog] = useState<{name: string, status: 'pending' | 'success' | 'error', error?: string}[]>([]);
@@ -24,16 +34,48 @@ const App: React.FC = () => {
   const gitHubService = useMemo(() => token ? new GitHubService(token) : null, [token]);
   const glmService = useMemo(() => new GLMService(), []);
 
+  // 当前显示的仓库和分析
+  const currentRepos = activeTab === 'forks' ? forks : mine;
+  const currentAnalyses = activeTab === 'forks' ? forkAnalyses : mineAnalyses;
+  const currentSelectedIds = activeTab === 'forks' ? selectedForkIds : selectedMineIds;
+  const setCurrentSelectedIds = activeTab === 'forks' ? setSelectedForkIds : setSelectedMineIds;
+
+  // 自动连接（如果有保存的 token）
+  useEffect(() => {
+    const savedToken = sessionStorage.getItem('github_token');
+    if (savedToken && status === AppState.IDLE) {
+      handleConnect(savedToken);
+    }
+  }, []);
+
+  // 登出处理
+  const handleLogout = () => {
+    sessionStorage.removeItem('github_token');
+    setToken('');
+    setUser(null);
+    setForks([]);
+    setMine([]);
+    setForkAnalyses({});
+    setMineAnalyses({});
+    setSelectedForkIds(new Set());
+    setSelectedMineIds(new Set());
+    setStatus(AppState.IDLE);
+  };
+
   const handleConnect = async (inputToken: string) => {
     setStatus(AppState.LOADING);
     setError(null);
     try {
       const service = new GitHubService(inputToken);
       const userData = await service.getCurrentUser();
-      const forks = await service.listForks();
-      
+      const allRepos = await service.listAllRepos();
+
+      // 保存 token 到 sessionStorage
+      sessionStorage.setItem('github_token', inputToken);
+
       setUser(userData);
-      setRepos(forks);
+      setForks(allRepos.forks);
+      setMine(allRepos.mine);
       setToken(inputToken);
       setStatus(AppState.LOADED);
     } catch (err: any) {
@@ -43,22 +85,25 @@ const App: React.FC = () => {
   };
 
   const handleAnalyze = async () => {
-    if (repos.length === 0) return;
+    if (currentRepos.length === 0) return;
     setStatus(AppState.LOADING);
     setError(null);
     try {
-      const results = await glmService.analyzeRepos(repos);
+      const results = await glmService.analyzeRepos(currentRepos, activeTab);
       const analysisMap: Record<number, AIAnalysis> = {};
       results.forEach(analysis => {
         analysisMap[analysis.repoId] = analysis;
       });
-      setAnalyses(analysisMap);
 
-      // 智能勾选建议删除的项目
-      const deleteIds = results
-        .filter(a => a.recommendation === 'DELETE')
-        .map(a => Number(a.repoId));
-      setSelectedIds(new Set(deleteIds));
+      if (activeTab === 'forks') {
+        setForkAnalyses(analysisMap);
+        const deleteIds = results.filter(a => a.recommendation === 'DELETE').map(a => Number(a.repoId));
+        setSelectedForkIds(new Set(deleteIds));
+      } else {
+        setMineAnalyses(analysisMap);
+        // mine 类型不自动勾选 DELETE，让用户手动确认
+        setSelectedMineIds(new Set());
+      }
     } catch (err) {
       setError("AI 智能分析暂时不可用，请稍后再试。");
     } finally {
@@ -67,33 +112,48 @@ const App: React.FC = () => {
   };
 
   const toggleRepo = useCallback((id: number) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+    if (activeTab === 'forks') {
+      setSelectedForkIds(prev => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+    } else {
+      setSelectedMineIds(prev => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+    }
+  }, [activeTab]);
+
+  const handleTabChange = (tab: RepoType) => {
+    setActiveTab(tab);
+    // 切换标签时不清空已选择状态，但搜索词清空
+    setSearchTerm('');
+  };
 
   const handleDeleteSelected = async () => {
-    if (!gitHubService || selectedIds.size === 0) return;
-    
-    const count = selectedIds.size;
+    if (!gitHubService || currentSelectedIds.size === 0) return;
+
+    const count = currentSelectedIds.size;
     if (!window.confirm(`确认永久删除这 ${count} 个项目吗？此操作无法恢复。`)) return;
 
     setIsDeleting(true);
     setStatus(AppState.DELETING);
-    
-    const selectedRepos = repos.filter(r => selectedIds.has(Number(r.id)));
+
+    const selectedRepos = currentRepos.filter(r => currentSelectedIds.has(Number(r.id)));
     const initialLog = selectedRepos.map(r => ({ name: r.full_name, status: 'pending' as const }));
     setDeleteLog(initialLog);
 
     let successCount = 0;
-    
+
     for (let i = 0; i < selectedRepos.length; i++) {
       const repo = selectedRepos[i];
       setCurrentDeletingIndex(i);
-      
+
       try {
         await gitHubService.deleteRepo(repo.full_name);
         setDeleteLog(prev => {
@@ -116,9 +176,14 @@ const App: React.FC = () => {
     // 延迟片刻后关闭模态框并刷新
     setTimeout(async () => {
       try {
-        const freshForks = await gitHubService.listForks();
-        setRepos(freshForks);
-        setSelectedIds(new Set());
+        const allRepos = await gitHubService.listAllRepos();
+        if (activeTab === 'forks') {
+          setForks(allRepos.forks);
+          setSelectedForkIds(new Set());
+        } else {
+          setMine(allRepos.mine);
+          setSelectedMineIds(new Set());
+        }
         setIsDeleting(false);
         setStatus(AppState.LOADED);
         alert(`清理完成！成功删除 ${successCount} 个项目。`);
@@ -129,11 +194,11 @@ const App: React.FC = () => {
   };
 
   const filteredRepos = useMemo(() => {
-    return repos.filter(r => 
+    return currentRepos.filter(r =>
       r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (r.description && r.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-  }, [repos, searchTerm]);
+  }, [currentRepos, searchTerm]);
 
   if (status === AppState.IDLE && !token) {
     return (
@@ -163,8 +228,8 @@ const App: React.FC = () => {
                 <span className="text-sm font-semibold text-gray-700 hidden sm:block">{user.login}</span>
               </div>
             )}
-            <button 
-              onClick={() => window.location.reload()}
+            <button
+              onClick={handleLogout}
               className="text-xs font-bold text-gray-400 hover:text-gray-600 uppercase tracking-widest transition-colors"
             >
               登出
@@ -181,12 +246,17 @@ const App: React.FC = () => {
           </div>
         )}
 
+        {/* Tab Selector */}
+        <div className="mb-8">
+          <TabSelector activeTab={activeTab} onTabChange={handleTabChange} />
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8 items-start mb-10">
           <div className="flex-1 w-full">
             <div className="relative mb-6">
               <input
                 type="text"
-                placeholder="搜索您的 Fork 项目..."
+                placeholder={`搜索您的 ${activeTab === 'forks' ? 'Fork' : '自建'} 项目...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
@@ -198,7 +268,7 @@ const App: React.FC = () => {
               <div className="flex items-center gap-4">
                 <button
                   onClick={handleAnalyze}
-                  disabled={status === AppState.LOADING || repos.length === 0}
+                  disabled={status === AppState.LOADING || currentRepos.length === 0}
                   className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-100 active:scale-[0.98]"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
@@ -207,20 +277,20 @@ const App: React.FC = () => {
                 <div className="h-8 w-px bg-gray-200 mx-2 hidden sm:block"></div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">已选:</span>
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-black rounded-full">{selectedIds.size}</span>
+                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-black rounded-full">{currentSelectedIds.size}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setSelectedIds(new Set(repos.map(r => r.id)))}
+                  onClick={() => setCurrentSelectedIds(new Set(currentRepos.map(r => r.id)))}
                   className="text-xs font-bold text-gray-500 hover:text-blue-600 uppercase tracking-widest transition-colors"
                 >
                   全选
                 </button>
                 <span className="text-gray-300">|</span>
                 <button
-                  onClick={() => setSelectedIds(new Set())}
+                  onClick={() => setCurrentSelectedIds(new Set())}
                   className="text-xs font-bold text-gray-500 hover:text-red-600 uppercase tracking-widest transition-colors"
                 >
                   取消全选
@@ -235,9 +305,9 @@ const App: React.FC = () => {
             <RepoCard
               key={repo.id}
               repo={repo}
-              isSelected={selectedIds.has(repo.id)}
+              isSelected={currentSelectedIds.has(repo.id)}
               onToggle={toggleRepo}
-              analysis={analyses[repo.id]}
+              analysis={currentAnalyses[repo.id]}
             />
           ))}
           {filteredRepos.length === 0 && (
@@ -251,11 +321,11 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {selectedIds.size > 0 && (
+      {currentSelectedIds.size > 0 && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-lg px-4 z-40 animate-slide-up">
           <div className="bg-gray-900 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4 border border-white/10 backdrop-blur-md">
             <div className="flex-1">
-              <p className="text-white text-sm font-bold">已选择 {selectedIds.size} 个仓库</p>
+              <p className="text-white text-sm font-bold">已选择 {currentSelectedIds.size} 个仓库</p>
               <p className="text-gray-400 text-[10px] font-medium">确认无误后点击右侧按钮批量清理</p>
             </div>
             <button
