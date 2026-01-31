@@ -62,7 +62,7 @@
 - React 19.2
 - TypeScript 5.8
 - Vite 6.2
-- Tailwind CSS
+- Tailwind CSS (CDN)
 - GLM-4.7 API
 
 ## License
