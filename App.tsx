@@ -455,6 +455,7 @@ const App: React.FC = () => {
               isSelected={currentSelectedIds.has(repo.id)}
               onToggle={toggleRepo}
               analysis={currentAnalyses[repo.id]}
+              isFork={activeTab === 'forks'}
             />
           ))}
           {filteredRepos.length === 0 && (
