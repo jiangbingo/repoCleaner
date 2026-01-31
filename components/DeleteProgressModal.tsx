@@ -19,7 +19,7 @@ const DeleteProgressModal: React.FC<DeleteProgressModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/80 backdrop-blur-sm">
       <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-bold text-gray-900">正在清理仓库...</h2>
+          <h2 className="text-xl font-bold text-gray-900">正在清理仓库…</h2>
           <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
 

@@ -33,7 +33,7 @@ const RepoControls: React.FC<RepoControlsProps> = ({
             placeholder={`搜索您的 ${activeTab === 'forks' ? 'Fork' : '自建'} 项目...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+            className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-all shadow-sm"
           />
           <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
         </div>
@@ -46,7 +46,7 @@ const RepoControls: React.FC<RepoControlsProps> = ({
               className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-100 active:scale-[0.98]"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-              {status === AppState.LOADING ? '分析中...' : 'AI 智能识别'}
+              {status === AppState.LOADING ? '分析中…' : 'AI 智能识别'}
             </button>
             <div className="h-8 w-px bg-gray-200 mx-2 hidden sm:block"></div>
             <div className="flex items-center gap-2">

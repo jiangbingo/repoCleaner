@@ -37,7 +37,9 @@ const TokenInput: React.FC<TokenInputProps> = ({ onConfirm, isLoading }) => {
             value={token}
             onChange={(e) => setToken(e.target.value)}
             placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-            className="w-full bg-gray-50 border border-gray-300 rounded-lg py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
+            className="w-full bg-gray-50 border border-gray-300 rounded-lg py-3 px-4 text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all font-mono"
+            autoComplete="off"
+            spellCheck={false}
             required
           />
         </div>

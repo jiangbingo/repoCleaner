@@ -191,6 +191,31 @@ const App: React.FC = () => {
 
       try {
         await gitHubService.deleteRepo(repo.full_name);
+
+        // 立即从列表中移除已删除的仓库
+        if (activeTab === 'forks') {
+          setForks(prev => prev.filter(r => r.id !== repo.id));
+          setForkAnalyses(prev => {
+            const next = { ...prev };
+            delete next[repo.id];
+            return next;
+          });
+        } else {
+          setMine(prev => prev.filter(r => r.id !== repo.id));
+          setMineAnalyses(prev => {
+            const next = { ...prev };
+            delete next[repo.id];
+            return next;
+          });
+        }
+
+        // 从选中状态中移除
+        updateSelectedIds(prev => {
+          const next = new Set(prev);
+          next.delete(repo.id);
+          return next;
+        });
+
         setDeleteLog(prev => {
           const next = [...prev];
           next[i] = { ...next[i], status: 'success' };
@@ -198,6 +223,7 @@ const App: React.FC = () => {
         });
         successCount++;
       } catch (e: any) {
+        // 失败则保留在列表中，只记录错误
         setDeleteLog(prev => {
           const next = [...prev];
           next[i] = { ...next[i], status: 'error', error: e.message };
@@ -207,19 +233,18 @@ const App: React.FC = () => {
       await new Promise(r => setTimeout(r, 200));
     }
 
-    setTimeout(async () => {
-      try {
-        const allRepos = await gitHubService.listAllRepos();
-        setForks(allRepos.forks);
-        setMine(allRepos.mine);
-        updateSelectedIds(new Set());
-        setIsDeleting(false);
-        setStatus(AppState.LOADED);
-        alert(`清理完成！成功删除 ${successCount} 个项目。`);
-      } catch (e) {
-        window.location.reload();
-      }
-    }, 1000);
+    // 删除完成，重置状态并显示汇总
+    setIsDeleting(false);
+    setStatus(AppState.LOADED);
+    setDeleteLog([]);
+    setCurrentDeletingIndex(-1);
+
+    const failCount = selectedRepos.length - successCount;
+    if (failCount === 0) {
+      alert(`✅ 清理完成！成功删除 ${successCount} 个项目。`);
+    } else {
+      alert(`⚠️ 清理完成！成功 ${successCount} 个，失败 ${failCount} 个。失败的仓库保留在列表中，请稍后重试。`);
+    }
   };
 
   const cancelDelete = () => {

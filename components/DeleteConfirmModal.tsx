@@ -77,7 +77,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           ))}
           {repos.length > 5 && (
             <div className="text-xs text-gray-400 mt-1">
-              ...等 {repos.length} 个项目
+              …等 {repos.length} 个项目
             </div>
           )}
         </div>
@@ -92,7 +92,9 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="输入仓库名称"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:border-red-500"
+              autoComplete="off"
+              spellCheck={false}
             />
           </div>
         )}
