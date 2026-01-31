@@ -1,0 +1,5 @@
+{
+  "name": "ForkSweeper AI",
+  "description": "A sophisticated tool to clean up your GitHub account by identifying and bulk-deleting unused forked repositories using AI-assisted analysis.",
+  "requestFramePermissions": []
+}
