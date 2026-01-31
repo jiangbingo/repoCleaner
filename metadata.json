@@ -1,5 +1,0 @@
-{
-  "name": "RepoCleaner",
-  "description": "AI 驱动的 GitHub 仓库清理工具，智能分析 Fork 仓库和原创项目，帮助保持 GitHub 仓库整洁。",
-  "requestFramePermissions": []
-}
