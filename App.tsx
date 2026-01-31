@@ -38,15 +38,39 @@ const App: React.FC = () => {
   const currentRepos = activeTab === 'forks' ? forks : mine;
   const currentAnalyses = activeTab === 'forks' ? forkAnalyses : mineAnalyses;
   const currentSelectedIds = activeTab === 'forks' ? selectedForkIds : selectedMineIds;
-  const setCurrentSelectedIds = activeTab === 'forks' ? setSelectedForkIds : setSelectedMineIds;
+
+  // 统一的选中状态管理函数，避免闭包陷阱
+  const updateSelectedIds = useCallback((ids: Set<number>) => {
+    if (activeTab === 'forks') {
+      setSelectedForkIds(ids);
+    } else {
+      setSelectedMineIds(ids);
+    }
+  }, [activeTab]);
 
   // 自动连接（如果有保存的 token）
   useEffect(() => {
     const savedToken = sessionStorage.getItem('github_token');
     if (savedToken && status === AppState.IDLE) {
-      handleConnect(savedToken);
+      // 内联连接逻辑，避免依赖 handleConnect 导致的额外渲染
+      setStatus(AppState.LOADING);
+      setError(null);
+      const service = new GitHubService(savedToken);
+      Promise.all([service.getCurrentUser(), service.listAllRepos()])
+        .then(([userData, allRepos]) => {
+          setUser(userData);
+          setForks(allRepos.forks);
+          setMine(allRepos.mine);
+          setToken(savedToken);
+          setStatus(AppState.LOADED);
+        })
+        .catch((err: any) => {
+          setError(err.message || "连接 GitHub 失败，请确保 Token 具有 repo 和 delete_repo 权限。");
+          setStatus(AppState.IDLE);
+          sessionStorage.removeItem('github_token');
+        });
     }
-  }, []);
+  }, []); // 空依赖数组，仅在挂载时执行
 
   // 登出处理
   const handleLogout = () => {
@@ -283,14 +307,14 @@ const App: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setCurrentSelectedIds(new Set(currentRepos.map(r => r.id)))}
+                  onClick={() => updateSelectedIds(new Set(currentRepos.map(r => r.id)))}
                   className="text-xs font-bold text-gray-500 hover:text-blue-600 uppercase tracking-widest transition-colors"
                 >
                   全选
                 </button>
                 <span className="text-gray-300">|</span>
                 <button
-                  onClick={() => setCurrentSelectedIds(new Set())}
+                  onClick={() => updateSelectedIds(new Set())}
                   className="text-xs font-bold text-gray-500 hover:text-red-600 uppercase tracking-widest transition-colors"
                 >
                   取消全选
