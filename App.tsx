@@ -242,7 +242,7 @@ const App: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </div>
-            <h1 className="text-lg font-bold text-gray-900 tracking-tight">Fork Cleaner</h1>
+            <h1 className="text-lg font-bold text-gray-900 tracking-tight">RepoCleaner</h1>
           </div>
           
           <div className="flex items-center gap-4">
@@ -272,7 +272,12 @@ const App: React.FC = () => {
 
         {/* Tab Selector */}
         <div className="mb-8">
-          <TabSelector activeTab={activeTab} onTabChange={handleTabChange} />
+          <TabSelector
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            forksCount={forks.length}
+            mineCount={mine.length}
+          />
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start mb-10">
@@ -350,7 +355,9 @@ const App: React.FC = () => {
           <div className="bg-gray-900 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4 border border-white/10 backdrop-blur-md">
             <div className="flex-1">
               <p className="text-white text-sm font-bold">已选择 {currentSelectedIds.size} 个仓库</p>
-              <p className="text-gray-400 text-[10px] font-medium">确认无误后点击右侧按钮批量清理</p>
+              <p className="text-gray-400 text-[10px] font-medium">
+                {activeTab === 'mine' ? '删除自己的仓库需要输入仓库名确认' : '确认无误后点击右侧按钮批量清理'}
+              </p>
             </div>
             <button
               onClick={handleDeleteSelected}
