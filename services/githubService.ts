@@ -37,31 +37,7 @@ export class GitHubService {
     return res.json();
   }
 
-  async listForks(): Promise<GitHubRepo[]> {
-    let page = 1;
-    let allRepos: GitHubRepo[] = [];
-    let hasMore = true;
-
-    while (hasMore) {
-      const res = await this.fetchWithAuth(`https://api.github.com/user/repos?type=owner&per_page=100&page=${page}`);
-      const data: GitHubRepo[] = await res.json();
-
-      if (data.length === 0) {
-        hasMore = false;
-      } else {
-        const forks = data.filter(repo => repo.fork);
-        allRepos = [...allRepos, ...forks];
-        page++;
-      }
-
-      // Safety break for very large accounts (1000 repos)
-      if (page > 10) break;
-    }
-
-    return allRepos;
-  }
-
-  async listAllRepos(): Promise<{ forks: GitHubRepo[], mine: GitHubRepo[] }> {
+  private async fetchAllUserRepos(): Promise<GitHubRepo[]> {
     let page = 1;
     let allRepos: GitHubRepo[] = [];
     let hasMore = true;
@@ -81,10 +57,18 @@ export class GitHubService {
       if (page > 10) break;
     }
 
-    // 按是否 fork 分组
+    return allRepos;
+  }
+
+  async listForks(): Promise<GitHubRepo[]> {
+    const allRepos = await this.fetchAllUserRepos();
+    return allRepos.filter(repo => repo.fork);
+  }
+
+  async listAllRepos(): Promise<{ forks: GitHubRepo[], mine: GitHubRepo[] }> {
+    const allRepos = await this.fetchAllUserRepos();
     const forks = allRepos.filter(repo => repo.fork);
     const mine = allRepos.filter(repo => !repo.fork);
-
     return { forks, mine };
   }
 
