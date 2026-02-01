@@ -329,10 +329,10 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <AppHeader user={user} onLogout={handleLogout} />
 
-      <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-4">
         {error && (
           <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-700">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -341,7 +341,7 @@ const App: React.FC = () => {
         )}
 
         {/* 视图切换和工具栏 */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* 视图切换按钮 */}
             <div className="flex bg-gray-100 rounded-xl p-1">
@@ -453,7 +453,7 @@ const App: React.FC = () => {
 
       {/* 浮动删除按钮 */}
       {(viewMode === 'timeline' ? (selectedForkIds.size > 0 || selectedMineIds.size > 0) : currentSelectedIds.size > 0) && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
           <button
             onClick={handleDeleteSelected}
             className="px-8 py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold rounded-2xl shadow-2xl hover:from-red-600 hover:to-pink-600 transition-all transform hover:scale-105 flex items-center gap-3"

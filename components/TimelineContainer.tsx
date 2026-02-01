@@ -46,7 +46,7 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({
   const sortedMine = useMemo(() => sortRepos(mine, mineAnalyses), [mine, mineAnalyses]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6 px-2">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4">
       <ForksTimeline
         repos={sortedForks}
         analyses={forkAnalyses}
