@@ -48,24 +48,24 @@ const TimelineCard: React.FC<TimelineCardProps> = ({
 
   return (
     <div
-      className={`relative pl-6 pb-6 cursor-pointer transition-all ${isSelected ? 'bg-blue-50' : ''}`}
+      className={`relative pl-5 pb-3 cursor-pointer transition-all ${isSelected ? 'bg-blue-50' : ''}`}
       onClick={onToggle}
     >
       {/* 时间轴节点 */}
-      <div className={`absolute left-0 top-2 w-3 h-3 rounded-full ${getNodeColor()} ring-4 ring-white shadow-sm`}></div>
+      <div className={`absolute left-0 top-1.5 w-2.5 h-2.5 rounded-full ${getNodeColor()} ring-3 ring-white shadow-sm`}></div>
 
       {/* 时间轴线 */}
-      <div className="absolute left-1.5 top-5 bottom-0 w-0.5 bg-gray-200 -z-10"></div>
+      <div className="absolute left-1 top-4 bottom-0 w-0.5 bg-gray-200 -z-10"></div>
 
       {/* 卡片内容 */}
       <div
-        className={`bg-white rounded-xl border-2 p-4 shadow-sm hover:shadow-md transition-all ${
-          isSelected ? 'border-blue-500' : 'border-transparent hover:border-gray-200'
+        className={`bg-white rounded-lg border p-3 shadow-sm hover:shadow-md transition-all ${
+          isSelected ? 'border-blue-500 border-2' : 'border-gray-100 hover:border-gray-200'
         }`}
       >
-        <div className="flex items-start justify-between mb-2">
+        <div className="flex items-start justify-between mb-1.5">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-1.5 mb-0.5">
               {getRecommendationBadge()}
               <a
                 href={repo.html_url}
@@ -88,27 +88,27 @@ const TimelineCard: React.FC<TimelineCardProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
+        <div className="flex items-center gap-2 text-xs text-gray-500 mb-1.5">
           <span>📅 {formatDate(repo.created_at)}</span>
         </div>
 
         {analysis && (
           <>
-            <div className="flex items-center gap-2 text-xs mb-2">
-              <span className="text-gray-600">📚 学习 {analysis.learningValue}/5</span>
-              <span className="text-gray-400">|</span>
-              <span className="text-gray-600">📖 参考 {analysis.referenceValue}/5</span>
-              <span className="text-gray-400">|</span>
-              <span className="text-gray-600">🛠️ 实用 {analysis.practicalValue}/5</span>
+            <div className="flex items-center gap-1.5 text-[11px] mb-1.5">
+              <span className="text-gray-600">📚 {analysis.learningValue}/5</span>
+              <span className="text-gray-300">|</span>
+              <span className="text-gray-600">📖 {analysis.referenceValue}/5</span>
+              <span className="text-gray-300">|</span>
+              <span className="text-gray-600">🛠️ {analysis.practicalValue}/5</span>
             </div>
             {analysis.reason && (
-              <p className="text-xs text-gray-600 line-clamp-2">💬 {analysis.reason}</p>
+              <p className="text-[11px] text-gray-600 line-clamp-2">💬 {analysis.reason}</p>
             )}
           </>
         )}
 
         {repo.description && (
-          <p className="text-xs text-gray-500 line-clamp-2 mt-2">{repo.description}</p>
+          <p className="text-[11px] text-gray-500 line-clamp-2 mt-1">{repo.description}</p>
         )}
       </div>
     </div>

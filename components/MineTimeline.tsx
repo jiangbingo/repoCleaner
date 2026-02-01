@@ -32,11 +32,11 @@ const Timeline: React.FC<TimelineProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-100 h-[600px] flex flex-col">
-      <h3 className="text-lg font-bold text-gray-900 mb-4 sticky top-0 bg-white py-2">
+    <div className="bg-white rounded-2xl p-4 border border-gray-100 h-[calc(100vh-200px)] min-h-[500px] flex flex-col">
+      <h3 className="text-base font-bold text-gray-900 mb-3 sticky top-0 bg-white py-1">
         {title} <span className="text-sm font-normal text-gray-500">({repos.length})</span>
       </h3>
-      <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin">
+      <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin space-y-1">
         {repos.map((repo) => (
           <TimelineCard
             key={repo.id}
