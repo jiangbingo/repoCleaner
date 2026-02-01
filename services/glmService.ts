@@ -123,9 +123,9 @@ ${JSON.stringify(repos, null, 2)}
       "reason": "详细分析理由（中文，50字内），说明为什么保留或删除",
       "valueScore": 综合价值评分(0-100),
       "valueDimensions": {
-        "learning": 学习价值(0-100),
-        "reference": 参考价值(0-100),
-        "utility": 实用价值(0-100)
+        "learningValue": 学习价值(0-100),
+        "referenceValue": 参考价值(0-100),
+        "practicalValue": 实用价值(0-100)
       },
       "techStack": ["技术栈标签数组", 如 "React", "TypeScript"],
       "tags": ["项目特性标签", 如 "ui-component", "tool"],
@@ -188,9 +188,9 @@ ${JSON.stringify(repos, null, 2)}
       "reason": "详细分析理由（中文，50字内），说明为什么保留或删除",
       "valueScore": 综合价值评分(0-100),
       "valueDimensions": {
-        "learning": 学习价值(0-100),
-        "reference": 参考价值(0-100),
-        "utility": 实用价值(0-100)
+        "learningValue": 学习价值(0-100),
+        "referenceValue": 参考价值(0-100),
+        "practicalValue": 实用价值(0-100)
       },
       "techStack": ["技术栈标签数组", 如 "React", "TypeScript"],
       "tags": ["项目特性标签", 如 "ui-component", "tool"],

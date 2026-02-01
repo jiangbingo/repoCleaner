@@ -23,9 +23,9 @@ export interface AIAnalysis {
   valueScore?: number; // 0-100 价值评分
   valueDimensions?: {
     // Forks 分析维度
-    learning?: number; // 学习价值 0-100
-    reference?: number; // 参考价值 0-100
-    utility?: number; // 实用价值 0-100
+    learningValue?: number; // 学习价值 0-100
+    referenceValue?: number; // 参考价值 0-100
+    practicalValue?: number; // 实用价值 0-100
     // Mine 分析维度
     originality?: number; // 原创性 0-100
     potential?: number; // 潜力 0-100
@@ -35,6 +35,10 @@ export interface AIAnalysis {
   techStack?: string[]; // 技术栈标签
   tags?: string[]; // 特性标签
   upstreamStatus?: 'active' | 'inactive' | 'unknown'; // 上游仓库状态
+  // 兼容旧字段
+  learning?: number;
+  reference?: number;
+  utility?: number;
 }
 
 export enum AppState {
