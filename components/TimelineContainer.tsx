@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { GitHubRepo, AIAnalysis } from '../types';
-import ForksTimeline from './ForksTimeline';
-import MineTimeline from './MineTimeline';
+import Timeline from './Timeline';
 
 interface TimelineContainerProps {
   forks: GitHubRepo[];
@@ -47,14 +46,14 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4">
-      <ForksTimeline
+      <Timeline
         repos={sortedForks}
         analyses={forkAnalyses}
         selectedIds={selectedForkIds}
         onToggle={onToggleFork}
         title="Forks 仓库"
       />
-      <MineTimeline
+      <Timeline
         repos={sortedMine}
         analyses={mineAnalyses}
         selectedIds={selectedMineIds}

@@ -251,7 +251,8 @@ const App: React.FC = () => {
         await gitHubService.deleteRepo(repo.full_name);
 
         // 立即从列表中移除已删除的仓库
-        const isFork = forks.some(r => r.id === repo.id);
+        // 使用 repo.fork 字段判断类型，更可靠
+        const isFork = repo.fork;
         if (isFork) {
           setForks(prev => prev.filter(r => r.id !== repo.id));
           setForkAnalyses(prev => {

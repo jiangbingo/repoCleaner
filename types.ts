@@ -17,7 +17,7 @@ export interface GitHubRepo {
 
 export interface AIAnalysis {
   repoId: number;
-  recommendation: 'KEEP' | 'DELETE' | 'MAYBE';
+  recommendation: 'KEEP' | 'DELETE' | 'HIGH' | 'MAYBE';
   reason: string;
   // 价值评估维度
   valueScore?: number; // 0-100 价值评分
