@@ -65,9 +65,9 @@ export class GLMService {
 
       const parsed = JSON.parse(content);
       return parsed.analyses || [];
-    } catch (e) {
+    } catch (e: any) {
       console.error("GLM AI analysis failed:", e);
-      throw e;
+      throw new Error(`AI 分析失败: ${e.message || JSON.stringify(e)}`);
     }
   }
 

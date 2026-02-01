@@ -146,9 +146,10 @@ const App: React.FC = () => {
         });
         setMineAnalyses(mineAnalysisMap);
         setSelectedMineIds(new Set());
-      } catch (err) {
-        setError("AI 智能分析暂时不可用，请稍后再试。");
-      } finally {
+      } catch (err: any) {
+        const errorMsg = err?.message || String(err);
+        console.error("分析错误详情:", errorMsg);
+        setError(`AI 分析失败: ${errorMsg}`);
         setStatus(AppState.LOADED);
       }
     } else {
@@ -171,9 +172,10 @@ const App: React.FC = () => {
           setMineAnalyses(analysisMap);
           setSelectedMineIds(new Set());
         }
-      } catch (err) {
-        setError("AI 智能分析暂时不可用，请稍后再试。");
-      } finally {
+      } catch (err: any) {
+        const errorMsg = err?.message || String(err);
+        console.error("分析错误详情:", errorMsg);
+        setError(`AI 分析失败: ${errorMsg}`);
         setStatus(AppState.LOADED);
       }
     }
